@@ -1,0 +1,9 @@
+//------------------------------------------------
+// pUpdatesRelay config block
+
+ProcessConfig = pUpdatesRelay
+{
+   AppTick   = 4
+   CommsTick = 4
+}
+
