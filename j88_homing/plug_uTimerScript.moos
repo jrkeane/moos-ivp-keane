@@ -1,0 +1,27 @@
+//--------------------------------------------------------
+// uTimerScript Configuration Block
+
+ProcessConfig = uTimerScript
+{
+  AppTick   = 4
+  CommsTick = 4
+  
+  PAUSED     = false
+  RESET_MAX  = nolimit
+  RESET_TIME = end
+
+  //DELAY_RESET = 0.5
+  //rand_var   = varname=RND_VAL, min=0, max=100, key=at_post
+  //RANDVAR = varname=RND_VAL, min=0,  max=100, key=at_reset
+  //RANDVAR = varname=Y, min=0,  max=100, key=at_reset
+  //EVENT = var=NODE_MESSAGE_LOCAL, val="src_node=$(VNAME),dest_node=all,var_name=FOOBAR,string_val=$[X],$[Y]", time=0:30 
+
+  //EVENT = var=SEND_RANGE, val="noise=$[RND_VAL], unique_id=$[TCOUNT]", time=25:35
+  //EVENT = APCKF_UPDATES, val="points = -200,-200", time = 10
+
+
+}
+
+
+ 
+

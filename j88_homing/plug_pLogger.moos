@@ -1,0 +1,29 @@
+//--------------------------------------------------
+// pLogger Configuration Block (Created from Plugin)
+
+ProcessConfig = pLogger
+{
+  AppTick 	= 10
+  CommsTick 	= 10
+  
+  File		= LOG_%(VNAME)
+  PATH		= ./
+  SyncLog 	= true @ 1
+  AsyncLog 	= true
+  FileTimeStamp = true
+
+  Log = IVPHELM_LIFE_EVENT @ 0 nosync
+
+  Log = NAV_X @ 1
+  Log = NAV_Y @ 1
+  //Log = CRS_RANGE_REPORT @ 1
+  //Log = CRS_RANGE_REQUEST @ 1
+  Log = CRS_RANGE_REPORT_JACKAL @ 1
+  Log = RANGE_USV_AUV @ 1
+  //LOG_REQUEST = RANGE_USV_AUV @ 0 MONITOR
+
+  // Log it all!!!!!
+  WildCardLogging = false 
+  WildCardOmitPattern = *_STATUS
+  LogAuxSrc = true
+}

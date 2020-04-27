@@ -1,0 +1,226 @@
+//*******************************************************
+// ShoreSide Configuration File
+//
+
+ServerHost = localhost
+ServerPort = $(SPORT)
+Community  = $(SNAME)
+
+#include plug_origin_warp.moos
+  
+//--------------------------------------------------------
+Processconfig = ANTLER
+{
+  MSBetweenLaunches = 100
+
+  Run = MOOSDB                 @ NewConsole = false
+  Run = pMarineViewer          @ NewConsole = false
+  Run = pLogger                @ NewConsole = false
+  Run = uProcessWatch          @ NewConsole = false
+  Run = uFldContactRangeSensor @ NewConsole = false
+
+  Run = pShare             @ NewConsole = false
+  Run = pHostInfo          @ NewConsole = false
+  Run = uFldShoreBroker    @ NewConsole = false
+  Run = uFldNodeComms      @ NewConsole = false
+
+  //Run = uTimerScript        @ NewConsole = false
+  //Run = pTracking			@ NewConsole = false
+  Run = ./shoreside.py		@NewConsole = false
+
+}
+
+#include plug_pShare.moos
+#include plug_pHostInfo.moos
+#include plug_uTimerScript.moos
+
+//--------------------------------------------------
+// uFldShoreBroker Configuration Block
+
+ProcessConfig = uFldShoreBroker
+{
+  AppTick   = 1
+  CommsTick = 1
+
+  // Note: [QBRIDGE = FOO]  is shorthand for                    
+  //       [BRIDGE = src=FOO_$V,  alias=FOO] and                
+  //       [BRIDGE = src=FOO_ALL, alias=FOO]
+
+  qbridge  = DEPLOY, RETURN, STATION_KEEP, NODE_REPORT, NODE_MESSAGE
+  qbridge  = MOOS_MANUAL_OVERRIDE
+  qbridge  = RANGE_USV_AUV
+  qbridge  = APCKF_UPDATES
+
+  bridge   = src=APPCAST_REQ, alias=APPCAST_REQ
+  bridge   = src=CRS_RANGE_REPORT_$V, alias=CRS_RANGE_REPORT
+  bridge   = src=TRAIL_INFO, alias=TRAIL_INFO
+  bridge   = src=SURVEY, alias=SURVEY
+  
+  
+}
+
+//--------------------------------------------------
+// uFldNodeComms Configuration Block
+
+ProcessConfig = uFldNodeComms
+{
+  AppTick   = 2
+  CommsTick = 2
+
+           COMMS_RANGE = 750
+        CRITICAL_RANGE = 25
+      MIN_MSG_INTERVAL = 20
+        MAX_MSG_LENGTH = 1000
+                GROUPS = true
+  VIEW_NODE_RPT_PULSES = true
+}
+
+//---------------------------------------------------- uProcessWatch
+ProcessConfig = uProcessWatch                                   
+{                                                               
+  WATCH_ALL = true                                              
+  NOWATCH = uXMS* 
+}                                                   
+
+//------------------------------------------------------------- uXMS
+ProcessConfig = uXMS
+{
+  AppTick   = 1
+  CommsTick = 1
+  
+  VAR = PMB_REGISTER
+  VAR = PMB_UDP_LISTEN
+  VAR = APPCAST_REQ
+  VAR = DB_CLIENTS
+  VAR = PROC_WATCH_SUMMARY
+  VAR = CRS_RANGE_REQUEST
+  VAR = CRS_RANGE_REPORT
+
+  DISPLAY_SOURCE        = true
+  DISPLAY_TIME          = true
+  DISPLAY_COMMUNITY     = false   // default
+
+  REFRESH_MODE = streaming
+}
+
+//------------------------------------------------------------ uMAC
+ProcessConfig = uMAC
+{
+  AppTick       = 1
+  CommsTick     = 1
+}
+
+//------------------------------------------------------ pMOOSBridge
+ProcessConfig = pMOOSBridge
+{
+  AppTick   = 3
+  CommsTick = 3
+  UDPListen = 9200
+}
+
+//---------------------------------------------------------- pLogger
+ProcessConfig = pLogger
+{
+  AppTick       = 10
+  CommsTick     = 10
+  File          = LOG_SHORESIDE
+  PATH          = ./
+  SyncLog       = true @ 0.2
+  AsyncLog      = true
+  FileTimeStamp = true
+
+  // Log it all!!!!!
+  WildCardLogging = true 
+  WildCardOmitPattern = *_STATUS
+}
+//-------------------------------------------- uFldContactRangeSensor
+ProcessConfig = uFldContactRangeSensor
+{
+  AppTick   = 4
+  CommsTick = 4
+
+  push_distance = jackal = 750
+  push_distance = archie = 750
+  ping_wait     = archie = 32  
+  ping_color    = white
+  echo_color    = chartreuse
+
+  allow_echo_types = uuv,auv,glider,kayak, ship
+
+  //rn_algorithm = uniform,pct=0.04
+  rn_algorithm = gaussian,sigma=5
+}
+
+//------------------------------------------------- pMarineViewer
+ProcessConfig = pMarineViewer
+{
+  AppTick    = 4
+  CommsTick  = 4
+
+  TIFF_FILE            = none.tif  //AerialMIT.tif 
+  set_pan_x            = 50
+  set_pan_y            = -200
+  zoom                 = 0.6
+  vehicles_shape_scale = 2.5
+  vehicles_name_viewable   = names
+  vehicles_name_mode = names+shortmode
+  comms_pulse_viewable_all = false
+
+  appcast_viewable     = true
+  appcast_color_scheme = indigo
+
+  SCOPE = CONTACT_INFO
+
+  ACTION = STATION_ALL = false
+  ACTION = STATION_ALL = true
+
+  BUTTON_ONE   = DEPLOY  # DEPLOY_ALL=true # DEPLOY=true 
+  BUTTON_ONE   = MOOS_MANUAL_OVERRIDE_ALL=false 
+  BUTTON_ONE   = RETURN_ALL=false # RETURN=false
+  BUTTON_ONE   = HOME=false 
+
+  BUTTON_TWO   = RETURN  # RETURN_ALL=true 
+
+  //BUTTON_THREE = TRAIL-YES # SURVEY=false
+
+  //BUTTON_FOUR  = TRAIL-NO # SURVEY=true
+}
+
+//---------------------------------------------------------
+// pShare Config Block  (Created from Plugin)
+
+ProcessConfig = pShare
+{
+  AppTick    = 2
+  CommsTick  = 2
+
+  input = route =  localhost:$(SHARE_LISTEN)
+
+  // =======================================================
+  // Usage Info below
+  // =======================================================
+
+  // Simple forward of X to A on channel 8
+  // output = src_name = X,dest_name=A, route=multicast_8
+ 
+  // Simple forward of Y to B on a udp address
+
+  //output = src_name=Y, dest_name=B, route=localhost:9300
+ 
+  // Simple forward of Z to Z on a named address (no renaming)
+  // output = src_name = Z, route = oceanai.mit.edu:9020
+ 
+  // Setting up an input
+  // input = route = multicast_9
+  
+  //input = route = localhost:$(SHARE_LISTEN) & multicast_9
+
+ 
+  // Setting up lots of inputs at once
+  // input = route = "localhost:9069 & multicast_19 & multicast_65"
+
+  output = src_name = CRS_RANGE_REPORT, route = localhost:9001
+  //output = src_name = APCKF_UPDATES, route = localhost:9009
+
+
+}

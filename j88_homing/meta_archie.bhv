@@ -1,0 +1,80 @@
+//--------    FILE: archie.bhv   -------------
+
+initialize   DEPLOY = false
+initialize   RETURN = false
+
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{ 
+  name      = waypt_survey
+  pwt       = 100
+  condition = RETURN = false
+  condition = DEPLOY = true
+  endflag   = RETURN = true
+  perpetual = true
+
+         speed = 0.5   // meters per second
+        radius = 5.0
+   slip_radius = 15.0
+
+   // track top right to left
+	points = 250, 250: -250,250 
+	
+	// track top to bottom
+	//points = 200, 120: 100,-300  
+
+	// track bottom right to left 
+	//points = 200, -250:-400,-250
+	
+	// track bottom left to top left
+	//points = -250, -300: -250, 200 
+
+	// track bottom left to bottom right
+	//points = -250, -350: 250,-150
+
+	// track top left to bottom left
+	//points = -250, 200: -250, -300
+
+     repeat = 1
+  visual_hints = nextpt_color=yellow, nextpt_lcolor=aqua
+  visual_hints = vertex_color=yellow, edge_color=gray25
+  visual_hints = vertex_size=1, edge_size=1
+}
+
+
+
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{
+  name       = waypt_return
+  pwt        = 100
+  condition  = RETURN = true
+  condition  = DEPLOY = true
+  perpetual  = true
+  endflag    = RETURN = false
+  endflag    = DEPLOY = false
+
+         speed = 2.0
+        radius = 2.0
+     nm_radius = 8.0
+        points = $(START_POS)
+}
+
+//----------------------------------------------
+Behavior = BHV_Loiter
+{
+  name      = bhv_loiter
+  pwt       = 100
+  condition = DEPLOY = none
+  condition = RETURN = none
+  endflag   = RETURN = true
+
+         speed = 1.2
+     clockwise = false
+        radius = 8 
+     nm_radius = 20 
+  acquire_dist = 12
+       polygon = label,A : -40,-270:-60,-290:-100,-290:-120,-270:-120,-180:-100,-160:-60,-160:-40,-180
+}
+
+

@@ -1,0 +1,124 @@
+//--------    FILE: jackal.bhv   -------------
+
+initialize   HOME = false
+
+
+//-----------------------------------------------
+// Helm Behavior File
+
+set MODE = ACTIVE {
+  DEPLOY = true
+} INACTIVE                   
+
+set MODE = RETURNING {
+  MODE = ACTIVE
+  RETURN = true
+} 
+
+set MODE = SURVEYING {
+  MODE   = ACTIVE
+  HOME   != true
+  RETURN != true
+
+} 
+
+set MODE = HOMING {
+  MODE   = ACTIVE
+  HOME = true
+  RETURN != true
+
+} 
+
+
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{ 
+  name      = waypt_survey
+  pwt       = 100
+
+  condition = MODE == SURVEYING
+  endflag = HOME = true
+  //updates = SURVEY_UPDATES
+
+         speed = 2   // meters per second
+        radius = 5.0
+   slip_radius = 15.0
+
+   points = -100,-100:-100,100:-120,100:-120,-100
+   //points = -100,-100:-100,100:-120,100:-120,-100:-160,-100:-160,100:-180,100:-180,-100:-220,-100:-220,100
+   //points = format=lawnmower, x=0, y=40, height=60, width=180, lane_width=15
+
+     repeat = 0
+  visual_hints = nextpt_color=yellow, nextpt_lcolor=aqua
+  visual_hints = vertex_color=yellow, edge_color=gray25
+  visual_hints = vertex_size=1, edge_size=1
+}
+
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{
+  name       = waypt_return
+  pwt        = 80
+
+  condition = MODE == RETURNING
+  updates = RETURN_UPDATES
+
+         speed = 2.0
+        radius = 2.0
+     nm_radius = 8.0
+        points = $(START_POS)
+}
+
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{
+  name       = waypt_homing
+  pwt        = 100
+
+  condition = MODE == HOMING
+  perpetual = true
+  updates   = APCKF_UPDATES
+
+      speed = 2.0
+     radius = 5.0
+  nm_radius = 10.0
+     points = $(START_POS)
+
+}
+
+//----------------------------------------------
+Behavior = BHV_ConstantDepth
+{
+  name      = bhv_const_depth_b
+  pwt       = 100
+  duration  = no-time-limit
+  condition = MODE == ACTIVE
+
+        depth = 5
+
+}
+
+
+//----------------------------------------------
+Behavior = BHV_AvoidCollision
+{
+  name       = avd_collision
+  pwt        = 400
+  condition  = MODE == ACTIVE
+  condition  = MODE != STATION-KEEPING
+  updates    = CONTACT_INFO
+  endflag    = CONTACT_RESOLVED = $[CONTACT],avd 
+  templating = spawn
+
+              contact = to-be-set
+       pwt_outer_dist = 50
+       pwt_inner_dist = 20
+       completed_dist = 145
+    min_util_cpa_dist = 8
+    max_util_cpa_dist = 25
+         active_grade = linear
+     on_no_contact_ok = true
+          extrapolate = true
+                decay = 30,60
+  bearing_line_config = white:0, green:0.65, yellow:0.8, red:1.0
+}

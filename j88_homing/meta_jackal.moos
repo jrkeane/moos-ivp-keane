@@ -1,0 +1,119 @@
+ServerHost = localhost
+ServerPort = $(VPORT)
+Simulator  = true
+
+// Community name IS the vehicle name
+Community  = $(VNAME)
+
+#include plug_origin_warp.moos
+  
+//------------------------------------------------------------
+Processconfig = ANTLER
+{
+  MSBetweenLaunches = 100
+   
+  Run = MOOSDB             @ NewConsole = false
+  Run = uSimMarine         @ NewConsole = false
+  Run = pLogger            @ NewConsole = false
+  Run = pNodeReporter      @ NewConsole = false
+  Run = pMarinePID         @ NewConsole = false
+  Run = pHelmIvP           @ NewConsole = false
+  Run = pShare             @ NewConsole = false
+  Run = pHostInfo          @ NewConsole = false
+  Run = uFldNodeBroker     @ NewConsole = false
+  Run = uFldMessageHandler @ NewConsole = false
+  Run = pUpdatesRelay		@ NewConsole = false
+  Run = pBasicContactMgr	@ NewConsole = true
+  Run = uTimerScript       @ NewConsole = false ~ uTimerScript_RangeRequest
+  //Run = ./ownship.py		@ NewConsole = true
+  Run = pLogger				@ NewConsole = false 
+
+}
+
+#include plug_pLogger.moos
+#include plug_uFldNodeBroker.moos
+#include plug_pShare.moos
+#include plug_pHostInfo.moos
+#include plug_uFldMessageHandler.moos
+//#include plug_uSimMarine.moos
+#include plug_pHelmIvP.moos
+#include plug_pMarinePID.moos
+#include plug_pLogger_auv.moos
+#include plug_pNodeReporter.moos
+#include plug_pBasicContactMgr.moos
+#include plug_uTimerScript_RangeRequest.moos
+
+//------------------------------------------
+// ownship.py // 
+
+ProcessConfig = ownship.py
+{
+}
+
+
+//------------------------------------------------------
+// uSimMarine Configuration Block  (Created from plugin)
+
+ProcessConfig = uSimMarine
+{
+  AppTick   = 10
+  CommsTick = 10
+
+  start_pos = x = -100, y =-120, speed=0, heading=45, depth = 1
+  PREFIX    = NAV
+
+  BUOYANCY_RATE    = 0.025
+  MAX_DEPTH_RATE = 0.5
+  MAX_DEPTH_RATE_SPEED = 2.0
+
+}
+
+//------------------------------------------
+// pTracking // starting out again in 2018
+
+ProcessConfig = pTracking
+{
+  AppTick   = 4
+  CommsTick = 4
+}
+
+//---------------------------------------------------------
+// pShare Config Block  (Created from Plugin)
+
+ProcessConfig = pShare
+{
+  AppTick    = 2
+  CommsTick  = 2
+
+  input = route =  localhost:$(SHARE_LISTEN)
+
+  // =======================================================
+  // Usage Info below
+  // =======================================================
+
+  // Simple forward of X to A on channel 8
+  // output = src_name = X,dest_name=A, route=multicast_8
+ 
+  // Simple forward of Y to B on a udp address
+
+  //output = src_name=Y, dest_name=B, route=localhost:9300
+ 
+  // Simple forward of Z to Z on a named address (no renaming)
+  // output = src_name = Z, route = oceanai.mit.edu:9020
+ 
+  // Setting up an input
+  // input = route = multicast_9
+  
+  //input = route = localhost:$(SHARE_LISTEN) & multicast_9
+
+  // Setting up lots of inputs at once
+  // input = route = "localhost:9069 & multicast_19 & multicast_65"
+
+  output = src_name = VIEW_CIRCLE, route = localhost:9300
+  //output = src_name = APCKF_UPDATES, route = localhost:9009
+  
+
+
+
+}
+

@@ -1,0 +1,17 @@
+//------------------------------------------
+// uTimerScript config block
+
+ProcessConfig = uTimerScript_RangeRequest
+{
+  AppTick	= 4
+  CommsTick	= 4
+
+  PAUSED     = false
+  RESET_MAX  = nolimit
+  RESET_TIME = end
+  CONDITION  = (NAV_SPEED > 0)
+
+  EVENT = var=CRS_RANGE_REQUEST, val="name=archie", time=15
+  
+
+}
