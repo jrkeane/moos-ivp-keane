@@ -1,0 +1,300 @@
+// Level 2 Configuration file: M. Benjamin
+// fourth hack by J. Keane. 23 July 2015. 
+
+ServerHost = localhost
+ServerPort = 9000
+Simulator  = true
+
+Community  = santana
+
+MOOSTimeWarp = 30
+LatOrigin    = -35.119171
+LongOrigin   = 150.716015
+//LatOrigin  = -41.44239
+//LongOrigin = 147.078463
+
+//------------------------------------------
+// Antler configuration  block
+ProcessConfig = ANTLER
+{
+MSBetweenLaunches = 500
+
+  Run = MOOSDB                @ NewConsole = false
+  Run = pMarineViewer         @ NewConsole = true
+  Run = pLogger               @ NewConsole = false
+  Run = uSimMarine            @ NewConsole = false
+  Run = pNodeReporter         @ NewConsole = false
+  Run = pMarinePID            @ NewConsole = false
+  Run = pHelmIvP              @ NewConsole = false
+  Run = uTimerScript          @ NewConsole = false
+  Run = uFldBeaconRangeSensor @ NewConsole = true
+  Run = uXMS                  @ NewConsole = true
+  Run = pHomeToLBL            @ NewConsole = false
+  
+}
+
+//------------------------------------------
+// pHoming
+
+ProcessConfig = pHomeToLBL
+{
+  AppTick   = 1
+  CommsTick = 1
+  
+  VEHICLE_NAME  = SANTANA
+  BEACON_DEPTH  = 2
+  RR_CORRECTION_FACTOR = 1 //this could potentially be 2 or 0.5 to deal with rr issue encountered with antarctica log files. 
+  CLOSING_RANGE_DEMANDED = 10 // How close do you want the auv to get. Bigger range means a quicker result. small range means it'll be stuck in a convergence loop longer 
+}
+
+//------------------------------------------
+// uFldBeaconRangeSensor config block
+
+ProcessConfig = uFldBeaconRangeSensor
+{
+  AppTick   = 4
+  CommsTick = 4
+
+  // System-wide Simulator configuration
+  ping_payments = upon_accept
+  report_vars   = long
+
+  // Configurations for all vehicles/nodes
+  reach_distance = default = nolimit
+  node_push_dist = default = 200
+  node_pull_dist = default = 200
+  ping_wait      = default = 20
+
+  // Configurations for all beacons
+  default_beacon_report_range  = nolimit
+  default_beacon_push_dist  = 1000
+  default_beacon_pull_dist  = 1000
+  default_beacon_shape  = circle
+  default_beacon_color  = blue
+  default_beacon_width  = 4
+  default_beacon_freq   = never
+  //default_beacon_freq   = 30:50
+
+
+  // Configurations for individual beacons
+  // Example:
+  // beacon = x=1,y=2,label=foo,freq=17,shape=square,width=3,color=orange
+
+beacon = x =0, y=0, label = 01
+}
+
+//------------------------------------------
+// uTimerScript config block
+
+ProcessConfig = uTimerScript
+{
+  AppTick	= 4
+  CommsTick	= 4
+
+  PAUSED     = false
+  RESET_MAX  = 5000
+  RESET_TIME = end
+  CONDITION  = (NAV_SPEED > 0)
+
+  randvar        = varname=UVAR, min=0, max=359, key=at_post
+  randvar        = varname=GVAR, type=gaussian, min=0, max=400, mu=200, sigma=20, key=at_post
+  randvar        = varname=LGVAR, type=gaussian, min=0, max=400, mu=80, sigma=10, key=at_post
+
+  //event          = var=GAUSS_TEST_VAL, val=$(GVAR), time=4  
+  //event          = var=GAUSS_TEST_VAL, val=$(GVAR), time=0:40
+
+  //event          = var=LGAUSS_TEST_VAL, val=$(LGVAR), time=5  
+  //event          = var=LGAUSS_TEST_VAL, val=$(LGVAR), time=0:20
+
+  //event          = var=UNIFORM_TEST_VAL, val=$(UVAR), time=0  
+  //event          = var=UNIFORM_TEST_VAL, val=$(UVAR), time=15:20
+
+  reset_max  = no_limit
+  reset_time = all-posted
+
+  //time_warp   = 1:2
+  //delay_reset = 25
+  //delay_start = 10:20
+
+  EVENT = var=BRS_RANGE_REQUEST, val="name=santana", time=5:10
+  //EVENT = var=BRS_RANGE_REQUEST, val="name=hotel", time=15:20
+rn_algorithm = uniform, pct=.5
+
+//------------------------------------------
+// uSimMarine config block
+
+ProcessConfig = uSimMarine
+{
+  AppTick	= 10
+  CommsTick	= 10
+
+
+
+
+
+START_X=300
+START_Y=300
+
+START_SPEED     = 0
+START_HEADING   = 0
+  PREFIX        = NAV
+
+  buoyancy_rate    = 0.025
+  max_depth_rate = 5
+  max_depth_rate_speed = 2.0
+
+  default_water_depth = 40
+}
+
+
+//------------------------------------------
+// uProcessWatch config block
+
+ProcessConfig = uProcessWatch
+{
+  AppTick   = 4
+  CommsTick = 4
+
+  term_report_interval = 0.8
+
+  summary_wait = 5
+
+  nowatch   = uXMS*
+  nowatch   = uPokeDB*
+  nowatch   = uTermCommand*
+  watch_all = true
+}
+
+//------------------------------------------
+// uXMS config block
+
+ProcessConfig = uXMS
+{
+  AppTick   = 0.5
+  CommsTick = 0.5
+
+  VAR = IMS_*
+  VAR = NAV_X
+  VAR = NAV_Y
+  VAR = NAV_SPEED
+  VAR = BRS_RANGE_REPORT_SANTANA
+  VAR = M_RANGE
+  VAR = RETURN_UPDATES
+  VAR = CLOSER
+  VAR = TRILAT
+  VAR = VIEW_POINT
+  VAR = CLOSEST_RANGE
+}
+//------------------------------------------
+// pHelmIvP config block
+
+ProcessConfig = pHelmIvP
+{
+  AppTick    = 4
+  CommsTick  = 4
+
+  Behaviors  = santana.bhv
+  Verbose    = quiet
+  Domain     = course:0:359:360
+  Domain     = speed:0:4:21
+  domain     = depth:0:490:491
+
+  IVP_BEHAVIOR_DIR = ../../lib
+
+  ok_skew = any
+  active_start = false
+}
+
+//------------------------------------------
+// pMarinePID config block
+
+ProcessConfig = pMarinePID
+{
+  AppTick    = 20
+  CommsTick  = 20
+
+  VERBOSE       = true
+  DEPTH_CONTROL = true
+
+  // Yaw PID controller
+  YAW_PID_KP		 = 0.5
+  YAW_PID_KD		 = 0.0
+  YAW_PID_KI		 = 0.0
+  YAW_PID_INTEGRAL_LIMIT = 0.07
+
+  // Speed PID controller
+  SPEED_PID_KP		 = 1.0
+  SPEED_PID_KD		 = 0.0
+  SPEED_PID_KI		 = 0.0
+  SPEED_PID_INTEGRAL_LIMIT = 0.07
+
+  //Pitch PID controller
+  pitch_pid_kp                   = 1.5
+  pitch_pid_kd                   = 1.0
+  pitch_pid_ki                   = 0
+  pitch_pid_integral_limit       = 0
+
+  //ZPID controller
+  z_to_pitch_pid_kp              = 0.12
+  z_to_pitch_pid_kd              = 0
+  z_to_pitch_pid_ki              = 0.004
+  z_to_pitch_pid_integral_limit  = 0.05
+
+  //MAXIMUMS
+  MAXRUDDER    = 100
+  MAXTHRUST    = 100
+  maxpitch     = 15
+  maxelevator  = 13
+  // A non-zero SPEED_FACTOR overrides use of SPEED_PID
+  // Will set DESIRED_THRUST = DESIRED_SPEED * SPEED_FACTOR
+  SPEED_FACTOR = 20
+}
+
+//------------------------------------------
+// pMarineViewer config block
+
+ProcessConfig = pMarineViewer
+{
+  AppTick    = 4
+  CommsTick  = 4
+
+  TIFF_FILE            = jbayblue.tif
+  set_pan_x            = 0
+  set_pan_y            = 0
+  zoom                 = 1
+  vehicle_shape_scale  = 2
+  hash_delta           = 50
+  hash_shade           = 0.4
+  hash_viewable        = true
+
+  scope = ODOMETRY_DIST
+
+   // Appcast configuration
+  appcast_height       = 75
+  appcast_width        = 30
+  appcast_viewable     = true
+  appcast_color_scheme = indigo
+  nodes_font_size      = medium
+  procs_font_size      = medium
+  appcast_font_size    = small
+
+  BUTTON_ONE = DEPLOY # DEPLOY=true
+  BUTTON_ONE = MOOS_MANUAL_OVERIDE=false # RETURN=false
+  BUTTON_TWO = RETURN # RETURN=true
+  //BUTTON_THREE = HOMING # HOMING=true
+  
+
+  left_context[change-return-point] = RETURN_UPDATES = points=$(XPOS),$(YPOS)
+ 
+}
+
+//------------------------------------------
+// pNodeReporter config block
+
+ProcessConfig = pNodeReporter
+{
+  AppTick	= 2
+  CommsTick	= 2
+  VESSEL_TYPE   = UUV
+}
+

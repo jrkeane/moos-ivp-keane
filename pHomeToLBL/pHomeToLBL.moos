@@ -1,0 +1,9 @@
+//------------------------------------------------
+// pHomeToLBL config block
+
+ProcessConfig = pHomeToLBL
+{
+   AppTick   = 4
+   CommsTick = 4
+}
+

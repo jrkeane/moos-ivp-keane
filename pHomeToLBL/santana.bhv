@@ -1,0 +1,121 @@
+//--------    FILE: santana.bhv   -------------
+// J. Keane developing the homing behaviour
+// improvements on j3_hendrix
+
+initialize   DEPLOY = false
+initialize   RETURN = false
+initialize   HOMING = false
+initialize   CLOSING= false
+
+
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{ 
+  name      = waypt_survey
+  pwt       = 100
+  condition = RETURN = false
+  condition = ((DEPLOY = true) or (alpha = one)) or (bravo = two)
+  condition = HOMING = false
+  condition = CLOSING = false
+  //endflag   = RETURN = false
+  endflag   = HOMING = true
+  perpetual = true
+  updates   = NEWPTS
+
+          lead = 8
+   lead_damper = 1
+         speed = 1.6   // meters per second
+   capture_radius = 15.0
+   slip_radius = 25.0
+      
+        //points = -50,-50: -50, 50: 50, 50 : -50, -50 : 50, -50 : -50, 50
+        //points = -150,-80:150,80: 150, -40: -150, -40:-150,0:150,0:150,40:-150,40:-150,80:150,80:-150,-80 
+          points = -50,200 : -150,200 : -150,300 : -50,200 : -50, 300 : -150, 200   
+        repeat = 0
+  visual_hints = nextpt_color=red, nextpt_lcolor=green
+  visual_hints = vertex_color=yellow, edge_color=gray
+  //visual_hints = vertex_color=yellow, line_color=white
+  visual_hints = vertex_size=2, edge_size=1
+}
+
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{
+  name       = waypt_homing
+  pwt        = 100
+  condition  = (RETURN = false)
+  condition  = (DEPLOY = true)
+  condition  = (HOMING =  true)
+  condition  = (CLOSING=  false)
+  //endflag = RETURN  = false
+  endflag = CLOSING = true
+  perpetual  = true
+  updates    = HOMING_UPDATES
+  capture_radius = 15.0
+  slip_radius = 25.0
+  speed      = 1.6
+
+  points     = 0,0
+}
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{
+  name       = waypt_closing
+  pwt        = 100
+  condition  = (RETURN = false)
+  condition  = (DEPLOY = true)
+  condition  = (HOMING  = true)
+  condition  = (CLOSING = true)
+  endflag = RETURN  = false
+  endflag = HOMING  = true
+  endflag = CLOSING = false
+  perpetual  = true
+  updates    = CLOSING_UPDATES
+  capture_radius = 15.0
+  slip_radius = 25.0
+  speed      = 1.6
+ 
+  //points     = 0,0
+}
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{
+  name       = waypt_return
+  pwt        = 100
+  condition  = (RETURN = true)
+  condition  = (DEPLOY = true)
+  condition  = (HOMING = false)
+  condition  = (CLOSING= false)
+  endflag = RETURN = false
+  endflag = DEPLOY = false
+  endflag = HOMING = false
+  endflag = MISSION = complete
+  perpetual  = true
+  updates    = RETURN_UPDATES
+  capture_radius = 15.0
+  slip_radius = 25.0
+  speed      = 1.6
+  points     = 0,0
+}
+
+
+//----------------------------------------------
+ Behavior = BHV_ConstantDepth
+ {
+   // General Behavior Parameters
+   // ---------------------------
+   name         = const_dep_homing   // example
+   pwt          = 100                // default
+   duration     = no-time-limit
+   condition    = (DEPLOY = true)    // example
+   updates      = DEPTH_VALUE  // example
+
+   // Parameters specific to this behavior
+   // ------------------------------------
+            basewidth = 12          // default
+                depth = 3       // default
+            peakwidth = 8        // default
+          summitdelta = 10           // default
+   //depth_mismatch_var = DEPTH_DIFF   // example
+ }
+

@@ -1,0 +1,157 @@
+//--------    FILE: santana.bhv   -------------
+// J. Keane developing the homing behaviour
+// improvements on j3_hendrix
+
+initialize   DEPLOY = false
+initialize   RETURN = false
+initialize   HOMING = false
+initialize   CLOSING= false
+
+
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{ 
+  name      = waypt_survey
+  pwt       = 100
+  condition = RETURN = false
+  condition = ((DEPLOY = true) or (alpha = one)) or (bravo = two)
+  condition = HOMING = false
+  condition = CLOSING = false
+  //endflag   = RETURN = false
+  endflag   = HOMING = true
+  perpetual = true
+  updates   = NEWPTS
+
+          lead = 8
+   lead_damper = 1
+         speed = 2   // meters per second
+        radius = 5.0
+   slip_radius = 8.0
+      
+         //points = -50,-20: -50, 40: -10,40 : -10,-40 : 10,-40 : 10,40 : -50, 40
+       points = -150,-80:150,80: 150, -40: -150, -40:-150,0:150,0:150,40:-150,40:-150,80:150,80:-150,-80 
+        //points = format=lawnmower, label=foxtrot, x=0, y=0, height =150, width =300, lanewidth =30
+        repeat = 0
+  visual_hints = nextpt_color=red, nextpt_lcolor=green
+  visual_hints = vertex_color=yellow, edge_color=gray
+  //visual_hints = vertex_color=yellow, line_color=white
+  visual_hints = vertex_size=2, edge_size=1
+}
+
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{
+  name       = waypt_homing
+  pwt        = 100
+  condition  = (RETURN = false)
+  condition  = (DEPLOY = true)
+  condition  = (HOMING =  true)
+  condition  = (CLOSING=  false)
+  //endflag = RETURN  = false
+  endflag = CLOSING = true
+  perpetual  = true
+  updates    = HOMING_UPDATES
+  capture_radius = 2.0
+  slip_radius = 8.0
+  speed      = 2.0
+  radius     = 5.0
+  //points     = 0,200
+}
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{
+  name       = waypt_closing
+  pwt        = 100
+  condition  = (RETURN = false)
+  condition  = (DEPLOY = true)
+  condition  = (HOMING  = true)
+  condition  = (CLOSING = true)
+  endflag = RETURN  = false
+  endflag = HOMING  = true
+  endflag = CLOSING = false
+  perpetual  = true
+  updates    = CLOSING_UPDATES
+  capture_radius = 2.0
+  slip_radius = 8.0
+  speed      = 2.0
+  radius     = 5.0
+  //points     = 0,200
+}
+//----------------------------------------------
+Behavior = BHV_Waypoint
+{
+  name       = waypt_return
+  pwt        = 100
+  condition  = (RETURN = true)
+  condition  = (DEPLOY = true)
+  condition  = (HOMING = false)
+  condition  = (CLOSING= false)
+  endflag = RETURN = false
+  endflag = DEPLOY = false
+  endflag = HOMING = false
+  endflag = MISSION = complete
+  perpetual  = true
+  updates    = RETURN_UPDATES
+  capture_radius = 2.0
+  slip_radius = 8.0
+  speed      = 2.0
+  radius     = 5.0
+  //points     = 0,0
+}
+
+//----------------------------------------------
+//Behavior = BHV_AvoidObstacles
+{
+  name      = avoid_obs
+
+  priority        = 200
+  polygon         = format=radial, label=obs, x=60, y=-115, radius=5, pts=12
+  //polygon         = format=ellipse, label=obs, x=60, y=-130, minor=7, major=22, pts=18, degs=45, snap=0.01
+  allowable_ttc   = 20
+  activation_dist = 20   
+  buffer_dist     = 10
+  pheading_influence = 100
+
+}
+
+//----------------------------------------------
+
+Behavior = BHV_HSLine
+{
+  name      = hsline
+  condition = HSLINE=on
+
+  time_on_leg = 10
+}
+//----------------------------------------------
+ Behavior = BHV_ConstantDepth
+ {
+   // General Behavior Parameters
+   // ---------------------------
+   name         = const_dep_homing   // example
+   pwt          = 100                // default
+   duration     = no-time-limit
+   condition    = (DEPLOY = true)    // example
+   updates      = CONST_DEP_UPDATES  // example
+
+   // Parameters specific to this behavior
+   // ------------------------------------
+            basewidth = 12          // default
+                depth = 30       // default
+            peakwidth = 8        // default
+          summitdelta = 10           // default
+   //depth_mismatch_var = DEPTH_DIFF   // example
+ }
+
+//----------------------------------------------
+Behavior = BHV_MaxDepth
+{
+  name = maxdepth
+  pwt  = 200
+  condition = (DEPLOY = true)
+
+  max_depth = 10
+  tolerance = 1
+  duration = no-time-limit
+}
+
